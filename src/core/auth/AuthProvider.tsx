@@ -1,22 +1,28 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { PublicClientApplication, EventType, EventMessage, AuthenticationResult, InteractionRequiredAuthError } from '@azure/msal-browser';
-import { msalConfig, loginRequest, graphConfig } from './config';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import { PublicClientApplication, EventType, EventMessage, AuthenticationResult } from '@azure/msal-browser';
+import { msalConfig, loginRequest } from './config';
 import { BrowserUtils } from '@azure/msal-browser';
+import { GraphService } from '../../utils/services/GraphService';
+import { UserService } from '../../utils/services/UserService';
 
 interface AuthContextType {
   instance: PublicClientApplication;
   isAuthenticated: boolean;
+  isAuthorized: boolean;
   user: any;
   error: string | null;
   login: () => Promise<void>;
   logout: () => Promise<void>;
   isInitialized: boolean;
+  checkAuthorization: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 const msalInstance = new PublicClientApplication(msalConfig);
 msalInstance.initialize().catch(console.error);
+const graphService = new GraphService(msalInstance);
+const userService = new UserService(msalInstance);
 
 const getErrorMessage = (error: any): string => {
   if (typeof error === 'string') return error;
@@ -26,71 +32,50 @@ const getErrorMessage = (error: any): string => {
   return 'An unknown error occurred';
 };
 
-const getProfilePhoto = async (accessToken: string): Promise<string | null> => {
-  try {
-    const response = await fetch(`${graphConfig.endpoint}/me/photo/$value`, {
-      headers: { Authorization: `Bearer ${accessToken}` }
-    });
-
-    if (!response.ok) return null;
-    
-    const blob = await response.blob();
-    return URL.createObjectURL(blob);
-  } catch (error) {
-    console.error('Error fetching profile photo:', getErrorMessage(error));
-    return null;
-  }
-};
-
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
   const [user, setUser] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
-  
+
   const handleRedirectPromiseRef = useRef<Promise<any> | null>(null);
-  const loginTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const loginTimeoutRef = useRef<number | null>(null);
   const interactionInProgressRef = useRef<boolean>(false);
   const loginInProgressRef = useRef<boolean>(false);
-  const cleanupTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const cleanupTimeoutRef = useRef<number | null>(null);
+  const initializedRef = useRef(false);
 
   const clearInteractionState = () => {
     interactionInProgressRef.current = false;
     loginInProgressRef.current = false;
     setIsLoggingIn(false);
-    
+
     if (loginTimeoutRef.current) {
       clearTimeout(loginTimeoutRef.current);
       loginTimeoutRef.current = null;
     }
-    
+
     if (cleanupTimeoutRef.current) {
       clearTimeout(cleanupTimeoutRef.current);
       cleanupTimeoutRef.current = null;
     }
   };
 
-  const acquireToken = async (account: any) => {
+  const checkAuthorization = useCallback(async () => {
     try {
-      return await msalInstance.acquireTokenSilent({
-        ...loginRequest,
-        account,
-        scopes: [...loginRequest.scopes, 'User.Read']
-      });
+      const isUserAuthorized = await userService.isAuthorized();
+      setIsAuthorized(isUserAuthorized);
+      setError(null);
     } catch (error) {
-      if (error instanceof InteractionRequiredAuthError) {
-        return msalInstance.acquireTokenRedirect({
-          ...loginRequest,
-          account,
-          scopes: [...loginRequest.scopes, 'User.Read']
-        });
-      }
-      throw error;
+      console.error('Authorization check failed:', error);
+      setIsAuthorized(false);
+      setError(getErrorMessage(error));
     }
-  };
+  }, []);
 
-  const updateUserData = async (account: any) => {
+  const updateUserData = useCallback(async (account: any) => {
     if (!account) {
       throw new Error('No account data available');
     }
@@ -98,52 +83,57 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setError(null);
 
     try {
-      const tokenResponse = await acquireToken(account);
-      const photo = tokenResponse?.accessToken ? 
-        await getProfilePhoto(tokenResponse.accessToken) : 
-        null;
-      
+      const photo = await graphService.getProfilePhoto();
       setUser({ ...account, photo: photo || account.photo });
       setIsAuthenticated(true);
+
+      // Check authorization after successful authentication
+      await checkAuthorization();
     } catch (error) {
       console.error('Error updating user data:', getErrorMessage(error));
       setUser(account);
       setIsAuthenticated(true);
       setError('Unable to fetch complete profile data');
+
+      // Still check authorization even if profile photo fetch fails
+      await checkAuthorization();
     }
-  };
+  }, [checkAuthorization]);
+
+  const initializeAuth = useCallback(async () => {
+    try {
+      clearInteractionState();
+
+      const accounts = msalInstance.getAllAccounts();
+      if (accounts.length > 0) {
+        msalInstance.setActiveAccount(accounts[0]);
+        await updateUserData(accounts[0]);
+        setIsInitialized(true);
+        return;
+      }
+
+      if (!handleRedirectPromiseRef.current) {
+        handleRedirectPromiseRef.current = msalInstance.handleRedirectPromise();
+      }
+
+      const response = await handleRedirectPromiseRef.current;
+
+      if (response) {
+        msalInstance.setActiveAccount(response.account);
+        await updateUserData(response.account);
+      }
+    } catch (error) {
+      console.error('Error in auth initialization:', error);
+      setError(getErrorMessage(error));
+    } finally {
+      clearInteractionState();
+      setIsInitialized(true);
+    }
+  }, [updateUserData]);
 
   useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        clearInteractionState();
-
-        const accounts = msalInstance.getAllAccounts();
-        if (accounts.length > 0) {
-          msalInstance.setActiveAccount(accounts[0]);
-          await updateUserData(accounts[0]);
-          setIsInitialized(true);
-          return;
-        }
-
-        if (!handleRedirectPromiseRef.current) {
-          handleRedirectPromiseRef.current = msalInstance.handleRedirectPromise();
-        }
-
-        const response = await handleRedirectPromiseRef.current;
-        
-        if (response) {
-          msalInstance.setActiveAccount(response.account);
-          await updateUserData(response.account);
-        }
-      } catch (error) {
-        console.error('Error in auth initialization:', error);
-        setError(getErrorMessage(error));
-      } finally {
-        clearInteractionState();
-        setIsInitialized(true);
-      }
-    };
+    if (initializedRef.current) return;
+    initializedRef.current = true;
 
     initializeAuth();
 
@@ -158,50 +148,56 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           clearInteractionState();
           break;
 
-        case EventType.LOGIN_SUCCESS:
+        case EventType.LOGIN_SUCCESS: {
           const result = event.payload as AuthenticationResult;
           clearInteractionState();
           msalInstance.setActiveAccount(result.account);
           await updateUserData(result.account);
           break;
+        }
 
         case EventType.LOGOUT_SUCCESS:
           setUser(null);
           setIsAuthenticated(false);
+          setIsAuthorized(false);
           clearInteractionState();
           setError(null);
           break;
 
-        case EventType.LOGIN_FAILURE:
+        case EventType.LOGIN_FAILURE: {
           const errorMessage = event.error ? getErrorMessage(event.error) : 'Login failed';
           console.error('Login failed:', errorMessage);
           clearInteractionState();
           setError(errorMessage);
           break;
+        }
 
-        case EventType.ACQUIRE_TOKEN_SUCCESS:
+        case EventType.ACQUIRE_TOKEN_SUCCESS: {
           const tokenResult = event.payload as AuthenticationResult;
           if (tokenResult.account) {
             await updateUserData(tokenResult.account);
           }
           break;
+        }
       }
     });
 
     return () => {
-      msalInstance.removeEventCallback(callbackId);
-      
+      if (callbackId) {
+        msalInstance.removeEventCallback(callbackId);
+      }
+
       if (loginTimeoutRef.current) {
         clearTimeout(loginTimeoutRef.current);
       }
       if (cleanupTimeoutRef.current) {
         clearTimeout(cleanupTimeoutRef.current);
       }
-      
+
       loginInProgressRef.current = false;
       setIsLoggingIn(false);
     };
-  }, []);
+  }, [updateUserData, initializeAuth]);
 
   const login = async () => {
     if (interactionInProgressRef.current || isLoggingIn) {
@@ -218,10 +214,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     if (window.self !== window.top) {
       const currentUrl = new URL(window.location.href);
-      const topUrl = new URL(window.top.location.href);
-      
+      const topUrl = window.top ? new URL(window.top.location.href) : new URL(window.location.href);
+
       if (currentUrl.origin !== topUrl.origin || currentUrl.pathname !== topUrl.pathname) {
-        window.top.location.href = window.location.href;
+        if (window.top) {
+          window.top.location.href = window.location.href;
+        }
         return;
       }
     }
@@ -251,10 +249,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw new Error('Authentication cannot be initiated in a popup or iframe');
       }
 
-      await msalInstance.loginRedirect({
-        ...loginRequest,
-        prompt: 'select_account'
-      });
+      await msalInstance.loginRedirect({ ...loginRequest });
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error('Login error:', errorMessage);
@@ -279,6 +274,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         onRedirectNavigate: () => {
           setUser(null);
           setIsAuthenticated(false);
+          setIsAuthorized(false);
           return true;
         }
       });
@@ -293,11 +289,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const value = {
     instance: msalInstance,
     isAuthenticated,
+    isAuthorized,
     user,
     error,
     login,
     logout,
-    isInitialized
+    isInitialized,
+    checkAuthorization
   };
 
   return (
