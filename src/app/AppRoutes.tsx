@@ -36,13 +36,13 @@ const AppRoutes = () => {
         <Route path="marketplace/:id" element={<AssetInvestorView />} />
         <Route path="assets/:id/edit" element={<AssetEdit />} />
         <Route path="docuvault" element={<DocuVault />} />
-        <Route path="reports" element={<Reports />} />
+        <Route path="analytics" element={<Reports />} />
         <Route path="ai" element={<AIAssistant />} />
         <Route path="activity" element={<Activity />} />
-        <Route path="settings" element={<PrivateSettingsRoute><Settings /></PrivateSettingsRoute>}>
-          <Route index element={<Navigate to="/settings/general" replace />} />
+        <Route path="admin" element={<PrivateSettingsRoute><Settings /></PrivateSettingsRoute>}>
+          <Route index element={<Navigate to="/admin/general" replace />} />
           <Route path="general" element={<GeneralSettings />} />
-          <Route path="permissions" element={<PermissionsSettings />} />
+          <Route path="user-management" element={<PermissionsSettings />} />
           <Route path="assets" element={<AssetSettings />} />
           <Route path="documents" element={<DocumentSettings />} />
           <Route path="marketplace" element={<MarketplaceSettings />} />

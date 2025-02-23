@@ -2,7 +2,7 @@ import { PublicClientApplication } from '@azure/msal-browser';
 import { protectedResources } from '../../core/auth/config';
 import { BaseService } from './BaseService';
 
-export class UserService extends BaseService {
+export class CoreService extends BaseService {
     constructor(msalInstance: PublicClientApplication) {
         super(
             msalInstance,
@@ -33,5 +33,12 @@ export class UserService extends BaseService {
             console.error('Admin Authorization check failed:', error);
             return false;
         }
+    }
+
+    async getNavigationItems(): Promise<any> {
+        const params = {
+            $orderby: "Order"
+        }
+        return this.executeRequest<any>('get', '/odata/GlobalNavigation', params);
     }
 }

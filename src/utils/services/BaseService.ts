@@ -46,7 +46,8 @@ export abstract class BaseService {
     protected async executeRequest<T>(
         method: 'get' | 'post' | 'put' | 'delete',
         endpoint: string,
-        data?: any
+        data?: any,
+        params?: any
     ): Promise<T> {
         try {
             const token = await this.getAccessToken();
@@ -54,6 +55,7 @@ export abstract class BaseService {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
+                params
             };
 
             let response;

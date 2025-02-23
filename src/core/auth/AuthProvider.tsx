@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import { PublicClientApplication, EventType, EventMessage, AuthenticationResult } from '@azure/msal-browser';
 import { msalConfig, loginRequest } from './config';
 import { BrowserUtils } from '@azure/msal-browser';
-import { UserService } from '../../utils/services/UserService';
+import { CoreService } from '../../utils/services/CoreService';
 
 interface AuthContextType {
   instance: PublicClientApplication;
@@ -22,7 +22,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 const msalInstance = new PublicClientApplication(msalConfig);
 msalInstance.initialize().catch(console.error);
-const userService = new UserService(msalInstance);
+const coreService = new CoreService(msalInstance);
 
 const getErrorMessage = (error: any): string => {
   if (typeof error === 'string') return error;
@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const checkAuthorization = useCallback(async () => {
     try {
-      const isUserAuthorized = await userService.isAuthorized();
+      const isUserAuthorized = await coreService.isAuthorized();
       setIsAuthorized(isUserAuthorized);
       setError(null);
     } catch (error) {
@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const checkAdminAuthorization = useCallback(async () => {
     try {
-      const isAdmin = await userService.isAdmin();
+      const isAdmin = await coreService.isAdmin();
       setIsAdmin(isAdmin);
       setError(null);
     } catch (error) {
@@ -96,7 +96,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setError(null);
 
     try {
-      const user = await userService.getCurrentUser();
+      const user = await coreService.getCurrentUser();
       setUser(user);
       setIsAuthenticated(true);
 

@@ -1,18 +1,34 @@
-import React from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Settings as SettingsIcon, Users, Building2, FileText, Store, BarChart } from 'lucide-react';
-
-const navigation = [
-  { name: 'General', href: '/settings/general', icon: SettingsIcon, description: 'Basic platform settings like branding and localization' },
-  { name: 'Permissions', href: '/settings/permissions', icon: Users, description: 'Manage users, roles and access control' },
-  { name: 'Asset Settings', href: '/settings/assets', icon: Building2, description: 'Configure asset types and properties' },
-  { name: 'Document Settings', href: '/settings/documents', icon: FileText, description: 'Document categories and metadata settings' },
-  { name: 'Marketplace Settings', href: '/settings/marketplace', icon: Store, description: 'Trading and marketplace configuration' },
-  { name: 'Reports Settings', href: '/settings/reports', icon: BarChart, description: 'Configure reports and analytics settings' },
-];
+import { Settings as SettingsIcon, ChevronRight } from 'lucide-react';
+import { buildNavigation } from '../../utils/types/navigation';
+import { AdminService } from '../../utils/services/AdminService';
+import { useAuth } from '../../core/auth/AuthProvider';
 
 export default function Settings() {
   const location = useLocation();
+  const { instance } = useAuth();
+  const [adminNavData, setAdminNavData] = useState([]);
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const adminService = useMemo(() => new AdminService(instance), [instance]);
+  const navigationItems = buildNavigation(adminNavData);
+
+  const toggleExpand = (itemId: string) => {
+    setExpandedItems(prev =>
+      prev.includes(itemId)
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId]
+    );
+  };
+
+  const fetchAdminNavData = useCallback(async () => {
+    const response = await adminService.getAdminNavigationItems();
+    setAdminNavData(response.value);
+  }, [adminService])
+
+  useEffect(() => {
+    fetchAdminNavData();
+  }, [fetchAdminNavData])
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -28,28 +44,67 @@ export default function Settings() {
       <div className="grid grid-cols-12 gap-6">
         {/* Navigation Sidebar */}
         <div className="col-span-12 lg:col-span-3">
-          <nav className="space-y-1">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.href;
-              
+          <nav className="space-y-0.5">
+            {navigationItems.map((item) => {
+              const Icon = item.icon || SettingsIcon;
+              const isActive = location.pathname.startsWith(item.href);
+              const hasChildren = item.children && item.children.length > 0;
+              const isExpanded = expandedItems.includes(item.id);
+
               return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`${
-                    isActive
-                      ? 'bg-gray-50 border-indigo-500 text-indigo-700'
-                      : 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  } group flex items-center px-3 py-2 text-sm font-medium border-l-4`}
-                >
-                  <Icon
-                    className={`${
-                      isActive ? 'text-indigo-500' : 'text-gray-400 group-hover:text-gray-500'
-                    } flex-shrink-0 -ml-1 mr-3 h-6 w-6`}
-                  />
-                  <span className="truncate">{item.name}</span>
-                </Link>
+                <div key={item.id}>
+                  <div
+                    className={`
+                      group flex items-center justify-between px-3 py-2 text-sm font-medium border-l-4 cursor-pointer
+                      ${isActive
+                        ? 'bg-gray-50 border-indigo-500 text-indigo-700'
+                        : 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }
+                    `}
+                    onClick={() => hasChildren ? toggleExpand(item.id) : null}
+                  >
+                    <div className="flex items-center">
+                      <Icon
+                        className={`
+                          flex-shrink-0 -ml-1 mr-3 h-6 w-6
+                          ${isActive ? 'text-indigo-500' : 'text-gray-400 group-hover:text-gray-500'}
+                        `}
+                      />
+                      <Link to={item.href} className="truncate">
+                        {item.title}
+                      </Link>
+                    </div>
+                    {hasChildren && (
+                      <ChevronRight
+                        className={`
+                          h-5 w-5 text-gray-400 transition-transform duration-200
+                          ${isExpanded ? 'transform rotate-90' : ''}
+                        `}
+                      />
+                    )}
+                  </div>
+
+                  {/* Child Items */}
+                  {hasChildren && isExpanded && (
+                    <div className="ml-4 mt-1 space-y-1">
+                      {item.children && item.children.map(child => (
+                        <Link
+                          key={child.id}
+                          to={child.href}
+                          className={`
+                            group flex items-center px-3 py-2 text-sm font-medium rounded-md
+                            ${location.pathname === child.href
+                              ? 'bg-gray-50 text-indigo-600'
+                              : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                            }
+                          `}
+                        >
+                          <span className="truncate">{child.title}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               );
             })}
           </nav>

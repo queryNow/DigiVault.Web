@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ExternalLink } from 'lucide-react';
-import { LayoutService } from '../../../utils/services/LayoutService';
 import { useAuth } from '../../auth/AuthProvider';
+import { CoreService } from '../../../utils/services/CoreService';
 
 
 interface NavigationItem {
@@ -16,12 +16,12 @@ const Navbar = () => {
     const [navigationItems, setNavigationItems] = useState<NavigationItem[]>([]);
     const location = useLocation();
     const { instance } = useAuth();
-    const layoutService = useMemo(() => new LayoutService(instance), [instance]);
+    const coreService = useMemo(() => new CoreService(instance), [instance]);
 
     const fetchNavigationItems = useCallback(async () => {
-        const response = await layoutService.getNavigationItems();
+        const response = await coreService.getNavigationItems();
         setNavigationItems(response.value.sort((a: any, b: any) => a.Order - b.Order));
-    }, [layoutService]);
+    }, [coreService]);
 
     useEffect(() => {
         fetchNavigationItems()

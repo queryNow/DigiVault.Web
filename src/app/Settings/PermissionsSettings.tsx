@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Users, UserPlus, Shield, Search } from 'lucide-react';
 import { User, Group } from '../../utils/types/permissions';
 import UsersList from '../../core/components/Permissions/UsersList';
@@ -102,7 +103,8 @@ const AVAILABLE_PERMISSIONS = {
 };
 
 export default function PermissionsSettings() {
-  const [activeTab, setActiveTab] = useState<'users' | 'groups'>('users');
+  const location = useLocation();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddUser, setShowAddUser] = useState(false);
   const [showAddGroup, setShowAddGroup] = useState(false);
@@ -173,19 +175,19 @@ export default function PermissionsSettings() {
       <div className="mb-6">
         <div className="sm:hidden">
           <select
-            value={activeTab}
-            onChange={(e) => setActiveTab(e.target.value as 'users' | 'groups')}
+            value={location.hash === '#GRP' ? 'groups' : 'users'}
+            onChange={(e) => navigate(e.target.value)}
             className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
           >
-            <option value="users">Users</option>
-            <option value="groups">Groups</option>
+            <option value="#USR">Users</option>
+            <option value="#GRP">Groups</option>
           </select>
         </div>
         <div className="hidden sm:block">
           <nav className="flex space-x-4" aria-label="Tabs">
             <button
-              onClick={() => setActiveTab('users')}
-              className={`px-3 py-2 text-sm font-medium rounded-md ${activeTab === 'users'
+              onClick={() => navigate(`#USR`)}
+              className={`px-3 py-2 text-sm font-medium rounded-md ${location.hash === '#USR'
                 ? 'bg-indigo-100 text-indigo-700'
                 : 'text-gray-500 hover:text-gray-700'
                 }`}
@@ -194,8 +196,8 @@ export default function PermissionsSettings() {
               Users
             </button>
             <button
-              onClick={() => setActiveTab('groups')}
-              className={`px-3 py-2 text-sm font-medium rounded-md ${activeTab === 'groups'
+              onClick={() => navigate(`#GRP`)}
+              className={`px-3 py-2 text-sm font-medium rounded-md ${location.hash === '#GRP'
                 ? 'bg-indigo-100 text-indigo-700'
                 : 'text-gray-500 hover:text-gray-700'
                 }`}
@@ -218,14 +220,14 @@ export default function PermissionsSettings() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            placeholder={`Search ${activeTab}...`}
+            placeholder={`Search ${location.hash === '#GRP' ? 'groups' : 'users'}...`}
           />
         </div>
         <button
-          onClick={() => activeTab === 'users' ? setShowAddUser(true) : setShowAddGroup(true)}
+          onClick={() => location.hash === '#USR' ? setShowAddUser(true) : setShowAddGroup(true)}
           className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
         >
-          {activeTab === 'users' ? (
+          {location.hash === '#USR' ? (
             <>
               <UserPlus className="h-5 w-5 mr-2" />
               Add User
@@ -240,7 +242,7 @@ export default function PermissionsSettings() {
       </div>
 
       {/* Content */}
-      {activeTab === 'users' ? (
+      {location.hash === '#USR' ? (
         <UsersList
           users={users}
           onEditUser={(user) => {

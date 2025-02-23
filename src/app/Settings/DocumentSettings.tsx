@@ -1,5 +1,4 @@
-import React from 'react';
-import { FileText, Tag, Shield, Settings } from 'lucide-react';
+import { FileText, Tag, Shield } from 'lucide-react';
 
 const DOCUMENT_TYPES = [
   { id: 1, name: 'Legal Document', icon: FileText, count: 15 },
@@ -114,7 +113,7 @@ export default function DocumentSettings() {
                     <div>
                       <div className="text-sm font-medium text-gray-900">{policy.name}</div>
                       <div className="text-sm text-gray-500">
-                        Duration: {policy.duration} • 
+                        Duration: {policy.duration} •
                         {policy.autoArchive ? ' Auto-archive enabled' : ' Manual archive'}
                       </div>
                     </div>

@@ -22,9 +22,9 @@ const navigation = [
     { name: 'Asset Management', href: '/assets', icon: FileBox },
     { name: 'DocuVault', href: '/docuvault', icon: FileBox },
     { name: 'Marketplace', href: '/marketplace', icon: Store },
-    { name: 'Reports', href: '/reports', icon: BarChart },
+    { name: 'Reports', href: '/analytics', icon: BarChart },
     { name: 'AI Assistant', href: '/ai', icon: Bot },
-    { name: 'Settings', href: '/settings', icon: SettingsIcon },
+    { name: 'Settings', href: '/admin', icon: SettingsIcon },
 ];
 
 interface SidebarProps {
