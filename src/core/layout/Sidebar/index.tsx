@@ -87,6 +87,8 @@ const Sidebar = ({ isCollapsed, toggleCollapsed }: SidebarProps) => {
                                 const isActive = location.pathname === item.href ||
                                     (item.href !== '/' && location.pathname.startsWith(item.href));
 
+                                if (item.name === "Settings" && !user.Contribute) return;
+
                                 return (
                                     <Link
                                         key={item.name}

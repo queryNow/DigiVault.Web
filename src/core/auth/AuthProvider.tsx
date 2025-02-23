@@ -2,26 +2,26 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import { PublicClientApplication, EventType, EventMessage, AuthenticationResult } from '@azure/msal-browser';
 import { msalConfig, loginRequest } from './config';
 import { BrowserUtils } from '@azure/msal-browser';
-import { GraphService } from '../../utils/services/GraphService';
 import { UserService } from '../../utils/services/UserService';
 
 interface AuthContextType {
   instance: PublicClientApplication;
   isAuthenticated: boolean;
   isAuthorized: boolean;
+  isAdmin: boolean;
   user: any;
   error: string | null;
   login: () => Promise<void>;
   logout: () => Promise<void>;
   isInitialized: boolean;
   checkAuthorization: () => Promise<void>;
+  checkAdminAuthorization: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 const msalInstance = new PublicClientApplication(msalConfig);
 msalInstance.initialize().catch(console.error);
-const graphService = new GraphService(msalInstance);
 const userService = new UserService(msalInstance);
 
 const getErrorMessage = (error: any): string => {
@@ -35,6 +35,7 @@ const getErrorMessage = (error: any): string => {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [user, setUser] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
@@ -75,6 +76,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
+  const checkAdminAuthorization = useCallback(async () => {
+    try {
+      const isAdmin = await userService.isAdmin();
+      setIsAdmin(isAdmin);
+      setError(null);
+    } catch (error) {
+      console.error('Admin Authorization check failed:', error);
+      setIsAdmin(false);
+      setError(getErrorMessage(error));
+    }
+  }, []);
+
   const updateUserData = useCallback(async (account: any) => {
     if (!account) {
       throw new Error('No account data available');
@@ -83,22 +96,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setError(null);
 
     try {
-      const photo = await graphService.getProfilePhoto();
-      setUser({ ...account, photo: photo || account.photo });
+      const user = await userService.getCurrentUser();
+      setUser(user);
       setIsAuthenticated(true);
 
       // Check authorization after successful authentication
       await checkAuthorization();
+      await checkAdminAuthorization()
     } catch (error) {
       console.error('Error updating user data:', getErrorMessage(error));
       setUser(account);
       setIsAuthenticated(true);
       setError('Unable to fetch complete profile data');
-
-      // Still check authorization even if profile photo fetch fails
-      await checkAuthorization();
     }
-  }, [checkAuthorization]);
+  }, [checkAuthorization, checkAdminAuthorization]);
 
   const initializeAuth = useCallback(async () => {
     try {
@@ -290,12 +301,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     instance: msalInstance,
     isAuthenticated,
     isAuthorized,
+    isAdmin,
     user,
     error,
     login,
     logout,
     isInitialized,
-    checkAuthorization
+    checkAuthorization,
+    checkAdminAuthorization
   };
 
   return (

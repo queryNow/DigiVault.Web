@@ -20,6 +20,7 @@ import AssetSettings from './Settings/AssetSettings';
 import DocumentSettings from './Settings/DocumentSettings';
 import MarketplaceSettings from './Settings/MarketplaceSettings';
 import ReportsSettings from './Settings/ReportsSettings';
+import PrivateSettingsRoute from '../core/auth/PrivateSettingsRoute';
 
 
 const AppRoutes = () => {
@@ -38,7 +39,7 @@ const AppRoutes = () => {
         <Route path="reports" element={<Reports />} />
         <Route path="ai" element={<AIAssistant />} />
         <Route path="activity" element={<Activity />} />
-        <Route path="settings" element={<Settings />}>
+        <Route path="settings" element={<PrivateSettingsRoute><Settings /></PrivateSettingsRoute>}>
           <Route index element={<Navigate to="/settings/general" replace />} />
           <Route path="general" element={<GeneralSettings />} />
           <Route path="permissions" element={<PermissionsSettings />} />

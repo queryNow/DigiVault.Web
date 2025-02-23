@@ -17,10 +17,20 @@ export class UserService extends BaseService {
 
     async isAuthorized(): Promise<boolean> {
         try {
-            const response = await this.getCurrentUser();
+            const response = await this.executeRequest<any>('get', '/odata/currentuser');
             return response.Read;
         } catch (error) {
             console.error('Authorization check failed:', error);
+            return false;
+        }
+    }
+
+    async isAdmin(): Promise<boolean> {
+        try {
+            const response = await this.executeRequest<any>('get', '/odata/contribute');
+            return response.value;
+        } catch (error) {
+            console.error('Admin Authorization check failed:', error);
             return false;
         }
     }

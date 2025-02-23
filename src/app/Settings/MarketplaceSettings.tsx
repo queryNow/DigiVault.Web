@@ -1,5 +1,4 @@
-import React from 'react';
-import { Store, DollarSign, Clock, Settings, Shield } from 'lucide-react';
+import { Store, DollarSign, Clock, Shield } from 'lucide-react';
 
 const TRADING_HOURS = [
   { day: 'Monday', start: '09:00', end: '17:00' },
@@ -114,7 +113,7 @@ export default function MarketplaceSettings() {
                     <div>
                       <div className="text-sm font-medium text-gray-900">{setting.name}</div>
                       <div className="text-sm text-gray-500">
-                        {setting.enabled ? 'Enabled' : 'Disabled'} • 
+                        {setting.enabled ? 'Enabled' : 'Disabled'} •
                         {setting.mandatory ? ' Mandatory' : ' Optional'}
                       </div>
                     </div>
@@ -124,7 +123,7 @@ export default function MarketplaceSettings() {
                       <input
                         type="checkbox"
                         checked={setting.enabled}
-                        onChange={() => {}}
+                        onChange={() => { }}
                         className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                       />
                     </div>
