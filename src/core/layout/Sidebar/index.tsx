@@ -54,18 +54,9 @@ const Sidebar = ({ isCollapsed, toggleCollapsed }: SidebarProps) => {
         avatar: user?.photo || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&auto=format'
     };
     return (
-        <div>
+        <>
             <div className={`${isCollapsed ? 'w-16' : 'w-64'} flex-shrink-0 transition-all duration-300 fixed h-full z-10`}>
                 <div className="flex flex-col h-full bg-white border-r relative">
-                    {/* Logo */}
-                    <div className={`flex items-center flex-shrink-0 h-16 px-4 border-b border-gray-200 ${isCollapsed ? 'justify-center' : ''}`}>
-                        <img
-                            className="w-8 h-8"
-                            src="https://images.unsplash.com/photo-1633409361618-c73427e4e206?w=64&h=64&fit=crop&auto=format"
-                            alt="iTouch Logo"
-                        />
-                        {!isCollapsed && <span className="ml-2 text-xl font-semibold">iTouch DigiVault</span>}
-                    </div>
 
                     {/* Collapse/Expand Button */}
                     <button
@@ -175,7 +166,7 @@ const Sidebar = ({ isCollapsed, toggleCollapsed }: SidebarProps) => {
                     profile={userProfile}
                 />
             )}
-        </div>
+        </>
     )
 }
 
