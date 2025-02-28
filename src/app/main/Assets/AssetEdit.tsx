@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAssetStore } from '../../utils/store/assets';
-import AssetEditForm from '../../core/components/AssetEditForm';
+import { useAssetStore } from '../../../utils/store/assets';
+import AssetEditForm from './AssetEditForm';
 
 export default function AssetEdit() {
   const { id } = useParams();

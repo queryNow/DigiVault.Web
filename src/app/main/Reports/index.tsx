@@ -7,14 +7,14 @@ import {
   Users,
   FileText
 } from 'lucide-react';
-import { useAssetStore } from '../../utils/store/assets';
-import OverviewTab from '../../core/components/Reports/tabs/OverviewTab';
-import AssetsTab from '../../core/components/Reports/tabs/AssetsTab';
-import FinancialTab from '../../core/components/Reports/tabs/FinancialTab';
-import InvestorsTab from '../../core/components/Reports/tabs/InvestorsTab';
-import DocumentsTab from '../../core/components/Reports/tabs/DocumentsTab';
-import ReportHeader from '../../core/components/Reports/ReportHeader';
-import ReportTabs from '../../core/components/Reports/ReportTabs';
+import { useAssetStore } from '../../../utils/store/assets';
+import OverviewTab from './tabs/OverviewTab';
+import AssetsTab from './tabs/AssetsTab';
+import FinancialTab from './tabs/FinancialTab';
+import InvestorsTab from './tabs/InvestorsTab';
+import DocumentsTab from './tabs/DocumentsTab';
+import ReportHeader from './ReportHeader';
+import ReportTabs from './ReportTabs';
 
 const REPORT_TABS = [
   { id: 'overview', name: 'Overview', icon: BarChartIcon },

@@ -15,7 +15,7 @@ import {
   Building2,
   Loader2
 } from 'lucide-react';
-import { useAssetStore } from '../../utils/store/assets';
+import { useAssetStore } from '../../../utils/store/assets';
 
 const ASSET_TYPES = ['All Types', 'Real Estate', 'Securities', 'Private Equity', 'Infrastructure', 'Commodities'];
 const ASSET_STATUS = ['All Status', 'published', 'draft', 'archived'];

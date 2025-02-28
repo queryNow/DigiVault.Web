@@ -12,7 +12,7 @@ import AssetClassification from './steps/AssetClassification';
 import InvestmentDetails from './steps/InvestmentDetails';
 import Documents from './steps/Documents';
 import Review from './steps/Review';
-import { useAssetStore } from '../../../utils/store/assets';
+import { useAssetStore } from '../../../../utils/store/assets';
 
 // Reduced steps for better UX
 const STEPS = [

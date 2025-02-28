@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Building2, DollarSign, TrendingUp, Clock, AlertTriangle, FileText, Shield, MapPin, Tag, Info, Download, Share2 } from 'lucide-react';
-import { useAssetStore } from '../../utils/store/assets';
-import { useDocumentStore } from '../../utils/store/documents';
-import DocumentMetadataDialog from '../../core/components/DocumentMetadataDialog';
-import ShareDocumentDialog from '../../core/components/ShareDocumentDialog';
+import { useAssetStore } from '../../../utils/store/assets';
+import { useDocumentStore } from '../../../utils/store/documents';
+import DocumentMetadataDialog from '../DocuVault/DocumentMetadataDialog';
+import ShareDocumentDialog from '../DocuVault/ShareDocumentDialog';
 
 export default function AssetInvestorView() {
   const { id } = useParams();

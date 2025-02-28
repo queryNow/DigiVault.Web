@@ -20,11 +20,11 @@ import {
   Trash2
 } from 'lucide-react';
 
-import DocumentUpload from '../../core/components/DocumentUpload';
-import DocumentMetadataDialog from '../../core/components/DocumentMetadataDialog';
-import ShareDocumentDialog from '../../core/components/ShareDocumentDialog';
-import { useAssetStore } from '../../utils/store/assets';
-import { useDocumentStore } from '../../utils/store/documents';
+import DocumentMetadataDialog from '../DocuVault/DocumentMetadataDialog';
+import ShareDocumentDialog from '../DocuVault/ShareDocumentDialog';
+import { useAssetStore } from '../../../utils/store/assets';
+import { useDocumentStore } from '../../../utils/store/documents';
+import DocumentUpload from '../../../core/components/DocumentUpload';
 
 export default function AssetDetails() {
   const { id } = useParams();

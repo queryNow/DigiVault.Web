@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Search, LayoutGrid, List, Filter, ChevronDown } from 'lucide-react';
-import { useAssetStore } from '../../utils/store/assets';
-import MarketplaceFilters from '../../core/components/Marketplace/MarketplaceFilters';
-import MarketplaceMetrics from '../../core/components/Marketplace/MarketplaceMetrics';
-import AssetCard from '../../core/components/Marketplace/AssetCard';
-import AssetListItem from '../../core/components/Marketplace/AssetListItem';
+import { useAssetStore } from '../../../utils/store/assets';
+import MarketplaceFilters from './MarketplaceFilters';
+import MarketplaceMetrics from './MarketplaceMetrics';
+import AssetCard from './AssetCard';
+import AssetListItem from './AssetListItem';
 
 const SORT_OPTIONS = [
   { label: 'Newest First', value: 'newest' },

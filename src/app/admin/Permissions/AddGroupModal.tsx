@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { Group } from '../../types/permissions';
+import { Group } from '../../../utils/types/permissions';
 
 interface AddGroupModalProps {
   onClose: () => void;
@@ -61,11 +61,10 @@ export default function AddGroupModal({ onClose, onSave, availablePermissions }:
                   key={category}
                   type="button"
                   onClick={() => setSelectedCategory(category as keyof typeof availablePermissions)}
-                  className={`px-3 py-1 text-sm rounded-md ${
-                    selectedCategory === category
-                      ? 'bg-indigo-100 text-indigo-700'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                  className={`px-3 py-1 text-sm rounded-md ${selectedCategory === category
+                    ? 'bg-indigo-100 text-indigo-700'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
                 >
                   {category.charAt(0).toUpperCase() + category.slice(1)}
                 </button>

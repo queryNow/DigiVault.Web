@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { User, Search, X } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { User, X } from 'lucide-react';
 
 interface Person {
   id: string;
@@ -72,7 +72,7 @@ export default function PeoplePicker({ selectedPeople, onSelect, onRemove, place
         person =>
           !selectedPeople.find(p => p.id === person.id) &&
           (person.name.toLowerCase().includes(query.toLowerCase()) ||
-           person.email.toLowerCase().includes(query.toLowerCase()))
+            person.email.toLowerCase().includes(query.toLowerCase()))
       );
       setSuggestions(filtered);
       setIsOpen(true);

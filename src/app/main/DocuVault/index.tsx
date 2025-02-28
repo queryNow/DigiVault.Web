@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Search, Filter, LayoutGrid, List, ArrowUpDown, Upload } from 'lucide-react';
-import DocumentMetadataDialog from '../../core/components/DocumentMetadataDialog';
-import ShareDocumentDialog from '../../core/components/ShareDocumentDialog';
-import DocumentUpload from '../../core/components/DocumentUpload';
-import DocumentGrid from '../../core/components/DocuVault/DocumentGrid';
-import DocumentTable from '../../core/components/DocuVault/DocumentTable';
-import DocumentFilters from '../../core/components/DocuVault/DocumentFilters';
-import { useDocumentStore } from '../../utils/store/documents';
+import DocumentMetadataDialog from './DocumentMetadataDialog';
+import ShareDocumentDialog from './ShareDocumentDialog';
+import { useDocumentStore } from '../../../utils/store/documents';
+import DocumentFilters from './DocumentFilters';
+import DocumentTable from './DocumentTable';
+import DocumentGrid from './DocumentGrid';
+import DocumentUpload from '../../../core/components/DocumentUpload';
 
 // Constants
 const DOCUMENT_TYPES = ['All Types', 'Legal Document', 'Financial', 'Marketing', 'Technical', 'Other'];

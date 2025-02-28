@@ -3,23 +3,23 @@ import Login from './main/Login';
 import PrivateRoute from '../core/auth/PrivateRoute';
 import Layout from '../core/layout/Layout';
 import Dashboard from './main/Dashboard';
-import AssetManagement from './main/AssetManagement';
-import AssetCreation from './main/AssetCreation';
-import AssetDetails from './main/AssetDetails';
-import Marketplace from './main/Marketplace';
-import AssetInvestorView from './main/AssetInvestorView';
-import AssetEdit from './main/AssetEdit';
+import AssetManagement from './main/Assets/AssetManagement';
+import AssetCreation from './main/Assets/AssetCreation';
+import AssetDetails from './main/Assets/AssetDetails';
+import Marketplace from './main/Marketplace/Marketplace';
+import AssetInvestorView from './main/Marketplace/AssetInvestorView';
+import AssetEdit from './main/Assets/AssetEdit';
 import DocuVault from './main/DocuVault';
 import Reports from './main/Reports';
 import AIAssistant from './main/AIAssistant';
 import Activity from './main/Activity';
-import Settings from './Settings';
-import GeneralSettings from './Settings/GeneralSettings';
-import PermissionsSettings from './Settings/PermissionsSettings';
-import AssetSettings from './Settings/AssetSettings';
-import DocumentSettings from './Settings/DocumentSettings';
-import MarketplaceSettings from './Settings/MarketplaceSettings';
-import ReportsSettings from './Settings/ReportsSettings';
+import Settings from './admin';
+import GeneralSettings from './admin/GeneralSettings';
+import PermissionsSettings from './admin/Permissions/PermissionsSettings';
+import AssetSettings from './admin/AssetSettings';
+import DocumentSettings from './admin/DocumentSettings';
+import MarketplaceSettings from './admin/MarketplaceSettings';
+import ReportsSettings from './admin/ReportsSettings';
 import PrivateSettingsRoute from '../core/auth/PrivateSettingsRoute';
 
 
@@ -32,9 +32,9 @@ const AppRoutes = () => {
         <Route path="assets" element={<AssetManagement />} />
         <Route path="assets/new" element={<AssetCreation />} />
         <Route path="assets/:id" element={<AssetDetails />} />
+        <Route path="assets/:id/edit" element={<AssetEdit />} />
         <Route path="marketplace" element={<Marketplace />} />
         <Route path="marketplace/:id" element={<AssetInvestorView />} />
-        <Route path="assets/:id/edit" element={<AssetEdit />} />
         <Route path="docuvault" element={<DocuVault />} />
         <Route path="analytics" element={<Reports />} />
         <Route path="ai" element={<AIAssistant />} />
